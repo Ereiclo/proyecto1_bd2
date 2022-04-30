@@ -280,5 +280,33 @@ class ExtendibleHash {
 			page.r[i] = page.r[i+1];
 		}
 	}
+	bool existinrecord(Record record, int key){
+		if (record.key == key) return true;
+		return false;
+	}
+	Record search(int key){
+		int bucket = myHash(key) % (2 << (global_depth - 1));
+		int shift = global_depth-1;
+		auto temp = root;
+		while(temp->children != nullptr) temp = temp->children[(bucket >> shift--) & 1];
+		long temp_page = temp->page;
+		fstream file;
+		RecordPage p;
+		file.open(_file,ios::in|ios::out|ios::binary);
+		file.seekg(temp_page);
+		file.read((char*) &p,sizeof(p));
+		while(true){
+			for(int i=0; i<M; i++){
+				if (existinrecord(p.r[i], key)) return p.r[i];
+			}
+			if (p.next != 0){
+				temp_page = p.next;
+				file.seekg(temp_page);
+				file.read((char*) &p,sizeof(p)); 
+			}
+			else break;
+		}
+		abort();
+	}	
 
 };
