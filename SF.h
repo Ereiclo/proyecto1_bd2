@@ -477,7 +477,7 @@ public:
     }
 
     bool extra_condition(string file, int dato){
-        if ((_file == _aux_file && dato==-2) || (_file == file && dato!=-1))
+        if ((file == _aux_file && dato==-2) || (_file == file && dato!=-1))
             return true;
         return false;
     }
