@@ -142,8 +142,8 @@ void Function(int data_type){
         seqfile.showall();
             }
             else{
-              cout<<"seqfile.Search("<<key<<")"<<endl;
-              
+              cout<<"extfile.Search("<<key<<")"<<endl;
+              cout << extfile.search(key);
               //EHCASE
             }
 
@@ -164,6 +164,12 @@ void Function(int data_type){
         }
         else {
           //EHCASE
+          cout << "extfile.insert("<<key<<","<<cantidad<<","<<anio<<")"<<endl;
+          RecordE rec(key, cantidad, anio);
+          extfile.insert(rec);
+          cout << "done";
+          cout<<"*****************"<<endl;
+            
         }
 
         seqfile.showall();
@@ -171,8 +177,8 @@ void Function(int data_type){
         return;
     }
     else if(p[0]=="delete"){
+        key = stoi(p[6]);
         if (data_type == 0){
-          key = stoi(p[6]);
           cout<<"seqfile.remove("<<key<<")";
           seqfile.remove_record(key);
           cout << "done";
@@ -181,6 +187,11 @@ void Function(int data_type){
         }
         else{
           //EHCASE
+          cout<<"extfile.remove("<<key<<")";
+          seqfile.remove(key);
+          cout << "done";
+          cout<<"*****************"<<endl;
+          seqfile.showall();
         }
         
         return;
