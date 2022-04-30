@@ -476,15 +476,15 @@ public:
         return record;
     }
 
-    bool extra_condition(string _file, int dato){
-        if ((_file == "t_aux.dat" && dato==-2) || (_file == "t.dat" && dato!=-1))
+    bool extra_condition(string file, int dato){
+        if ((_file == _aux_file && dato==-2) || (_file == file && dato!=-1))
             return true;
         return false;
     }
 
-    vector<int> SearchPos(int begin, int end, string _file){
+    vector<int> SearchPos(int begin, int end, string file_){
         fstream file;
-        file.open(_file,ios::app);
+        file.open(file_,ios::app);
         file.seekg(0,ios::end);
         int nregistros = file.tellp()/sizeof(Record);
         cout<<"r2:"<<nregistros<<endl;
@@ -495,9 +495,9 @@ public:
         else{
             int m = 0;
             while(m < nregistros){
-                Record a = readRecord(m, _file);
+                Record a = readRecord(m, file_);
                 int nom = a.key;
-                if (begin < nom && nom < end && extra_condition(_file, a.next_freelist))
+                if (begin < nom && nom < end && extra_condition(file_, a.next_freelist))
                     Pos.push_back(m);
                 m++;
             }
@@ -507,16 +507,16 @@ public:
         return Pos;
     }
 
-    vector<Record> SearchByRange(int begin, int end, string aux, string main){
+    vector<Record> SearchByRange(int begin, int end){
         vector<Record> alumnos;
-        vector<int> k = SearchPos(begin ,end, main + ".dat");
-        vector<int> a = SearchPos(begin ,end, aux + ".dat");
+        vector<int> k = SearchPos(begin ,end, main + _file);
+        vector<int> a = SearchPos(begin ,end, aux + _aux_file);
         if(!k.empty() || !a.empty()){
             for(int i=0; i<k.size(); i++){
-                alumnos.push_back(readRecord(k[i], main + ".dat"));
+                alumnos.push_back(readRecord(k[i],  _file));
             }
             for (int i=0; i<a.size(); i++){
-                alumnos.push_back(readRecord(a[i], aux + ".dat"));
+                alumnos.push_back(readRecord(a[i], _aux_file));
             }
             return alumnos;
         }
