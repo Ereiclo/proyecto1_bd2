@@ -477,7 +477,7 @@ public:
     }
 
     bool extra_condition(string _file, int dato){
-        if ((_file == "test_aux.dat" && dato==-2) || (_file == "test.dat" && dato!=-1))
+        if ((_file == "t_aux.dat" && dato==-2) || (_file == "t.dat" && dato!=-1))
             return true;
         return false;
     }
@@ -507,16 +507,16 @@ public:
         return Pos;
     }
 
-    vector<Record> SearchByRange(int begin, int end){
+    vector<Record> SearchByRange(int begin, int end, string aux, string main){
         vector<Record> alumnos;
-        vector<int> k = SearchPos(begin ,end, "test.dat");
-        vector<int> a = SearchPos(begin ,end, "test_aux.dat");
+        vector<int> k = SearchPos(begin ,end, main + ".dat");
+        vector<int> a = SearchPos(begin ,end, aux + ".dat");
         if(!k.empty() || !a.empty()){
             for(int i=0; i<k.size(); i++){
-                alumnos.push_back(readRecord(k[i],"test.dat"));
+                alumnos.push_back(readRecord(k[i], main + ".dat"));
             }
             for (int i=0; i<a.size(); i++){
-                alumnos.push_back(readRecord(a[i], "test_aux.dat"));
+                alumnos.push_back(readRecord(a[i], aux + ".dat"));
             }
             return alumnos;
         }
