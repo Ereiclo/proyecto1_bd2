@@ -509,8 +509,8 @@ public:
 
     vector<Record> SearchByRange(int begin, int end){
         vector<Record> alumnos;
-        vector<int> k = SearchPos(begin ,end, main + _file);
-        vector<int> a = SearchPos(begin ,end, aux + _aux_file);
+        vector<int> k = SearchPos(begin ,end,  _file);
+        vector<int> a = SearchPos(begin ,end, _aux_file);
         if(!k.empty() || !a.empty()){
             for(int i=0; i<k.size(); i++){
                 alumnos.push_back(readRecord(k[i],  _file));
