@@ -223,7 +223,129 @@ public:
         }
     }
 
+    bool remove_record(int key){
+            fstream main;
+            fstream aux;
+            Metadata metadata;
+            pointer it;
+            main.open(_metadata,ios::in|ios::out|ios::binary);
+            main.read((char*)&metadata,sizeof(Metadata));
+            it.next = metadata.head_data.next;
+            it.aux = metadata.head_data.aux;
+            main.close();
+            main.open(_file,ios::in|ios::out|ios::binary);
+            aux.open(_aux_file,ios::in|ios::out|ios::binary);
 
+            Record del;
+            Record temp;
+
+            if(it.next == -1){
+                main.close();
+                aux.close();
+                return false;
+
+            }
+
+            if(it.aux){
+                aux.seekg(it.next);
+                aux.read((char*)&temp,sizeof(Record));
+            }else{
+                main.seekg(it.next);
+                main.read((char*)&temp,sizeof(Record));
+            }
+
+            if(temp.key == key){
+                if(it.aux){
+                    temp.next_freelist = metadata.head_free_list;
+                    aux.seekp(it.next);
+                    aux.write((char*)&temp,sizeof(Record));
+                    metadata.head_free_list = it.next;
+                    /* cout<<"siguiente a eliminar: "<<temp.next_freelist<<endl; */
+
+                }else{
+                    temp.next_freelist = -1;
+                    main.seekp(it.next);
+                    main.write((char*)&temp,sizeof(Record));
+
+                }
+                fstream md;
+                md.open(_metadata,ios::out|ios::binary);
+                metadata.head_data.next = temp.next.next;
+                metadata.head_data.aux = temp.next.aux;
+                md.write((char*)&metadata,sizeof(Metadata));
+                md.close();
+                return true;
+
+            }
+
+            while(true){
+                if(it.aux){
+                    aux.seekg(it.next);
+                    aux.read((char*)&temp,sizeof(Record));
+                }else{
+                    main.seekg(it.next);
+                    main.read((char*)&temp,sizeof(Record));
+                }
+
+                if(temp.next.next == -1){
+                    main.close();
+                    aux.close();
+                    return false;
+                }
+
+                if(temp.next.aux){
+                    aux.seekg(temp.next.next);
+                    aux.read((char*)&del,sizeof(Record));
+                }else{
+                    main.seekg(temp.next.next);
+                    main.read((char*)&del,sizeof(Record));
+                }
+
+                if(del.key == key){
+                    /* cout<<del.key<<endl<<endl<<endl; */
+                    if(temp.next.aux){
+                        del.next_freelist = metadata.head_free_list;
+                        aux.seekp(temp.next.next);
+                        aux.write((char*)&del,sizeof(Record));
+                        metadata.head_free_list = temp.next.next;
+                        /* cout<<"siguiente a eliminar: "<<del.next_freelist<<endl; */
+
+                        fstream md;
+                        md.open(_metadata,ios::out|ios::binary);
+                        md.write((char*)&metadata,sizeof(Metadata));
+                        md.close();
+
+                    }else{
+                        del.next_freelist = -1;
+                        main.seekp(temp.next.next);
+                        main.write((char*)&del,sizeof(Record));
+
+                    }
+
+                    temp.next.next = del.next.next;
+                    temp.next.aux = del.next.aux;
+
+
+
+                    if(it.aux){
+                        aux.seekg(it.next);
+                        aux.write((char*)&temp,sizeof(Record));
+                    }else{
+                        main.seekg(it.next);
+                        main.write((char*)&temp,sizeof(Record));
+                    }
+
+                    return true;
+                }
+
+                it.next = temp.next.next;
+                it.aux = temp.next.aux;
+
+            }
+
+
+
+        }
 
     void redo() {
         fstream main;
