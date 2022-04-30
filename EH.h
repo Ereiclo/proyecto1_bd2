@@ -280,7 +280,7 @@ class ExtendibleHash {
 			page.r[i] = page.r[i+1];
 		}
 	}
-	bool existinrecord(Record record, int key){
+	bool existinrecord(RecordE record, int key){
 		if (record.key == key) return true;
 		return false;
 	}
