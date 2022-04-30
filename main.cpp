@@ -117,7 +117,7 @@ void Function(int data_type){
               }
               else{
                 cout<<"extfile.RangeSearch("<<bkey<<","<<ekey<<")";
-                vector<RecordE> recs = extfile.SearchByRange(bkey, ekey, "t", "t_aux");
+                vector<RecordE> recs = extfile.SearchByRange(bkey, ekey);
                 for (int i=0; i<recs.size(); i++){
                   cout << recs[i].key << " " << recs[i].anio << " " <<recs[i].cantidad << endl;
                 }
