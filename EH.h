@@ -141,7 +141,6 @@ class ExtendibleHash {
   }
 
   ~ExtendibleHash(){
-
     map<string,long> ayuda;
     fstream index;
     index.open(_index,ios::out|ios::binary);
@@ -156,10 +155,6 @@ class ExtendibleHash {
 
     }
     index.close();
-
-    
-
-       
   }
 
   void showAll(){
@@ -171,9 +166,7 @@ class ExtendibleHash {
       cout<<"Pagina en posicion: "<<file.tellg()<<endl;
       file.read((char*)&p, sizeof(RecordPage));
       p.show_data();
-
     }
-
   }
 
   void insert(RecordE record){
@@ -199,41 +192,93 @@ class ExtendibleHash {
     
     } else {
       if (shift >= 0) {
-	long temp2 = temp->page;
-	long size2 = p.size;
-	file.seekp(0,ios::end);
-	temp->createChildren(temp2,file.tellp());
-	p.size = 0;
-	p.next = -1;
-	file.write((char*)&p,sizeof(p));
-	file.seekp(temp2);
-	file.write((char*)&p,sizeof(p));
-	file.close();
+        long temp2 = temp->page;
+        long size2 = p.size;
+        file.seekp(0,ios::end);
+        temp->createChildren(temp2,file.tellp());
+        p.size = 0;
+        p.next = -1;
+        file.write((char*)&p,sizeof(p));
+        file.seekp(temp2);
+        file.write((char*)&p,sizeof(p));
+        file.close();
 
-	insert(record);
+        insert(record);
 
-	for (int i = 0; i < size2; ++i){
-	  insert(p.r[i]);
-	}
+        for (int i = 0; i < size2; ++i){
+          insert(p.r[i]);
+        }
       } else {
-	RecordPage new_page;
-	file.seekp(0,ios::end);
-	new_page.r[0] = record;
-	new_page.size = 1;
-	new_page.next = file.tellp();
-	file.write((char*)&p,sizeof(p));
-	file.seekp(temp->page);
-	file.write((char*)&new_page,sizeof(new_page));
-	file.close();
-
+        RecordPage new_page;
+        file.seekp(0,ios::end);
+        new_page.r[0] = record;
+        new_page.size = 1;
+        new_page.next = file.tellp();
+        file.write((char*)&p,sizeof(p));
+        file.seekp(temp->page);
+        file.write((char*)&new_page,sizeof(new_page));
+        file.close();
       }
-
     }
-
-
   }
-	
 
+  bool remove(int key) {
+		cout << "Removing : " << key << endl;
+		int bucket = myHash(key) % (1 << global_depth);
+    int shift = global_depth-1;
+    auto temp = root;
 
-  
+    while(temp->children != nullptr) temp = temp->children[(bucket >> shift--) & 1];
+
+		bool found = false;
+		long prev_pos, overwrite_pos;
+		RecordPage prev_page, page, overwrite_page;
+		fstream file;
+		file.open(_file, ios::in | ios::out | ios::binary);
+		overwrite_pos = temp->page;
+		file.seekg(temp->page);
+		file.read((char*) & page, sizeof(page));
+		while (!found) {
+			for (int i = 0; i < page.size; i++) {
+				if (page.r[i].key == key) {
+					found = true;
+					remove_from_page(page, key, i);
+				}
+			}
+			if (page.next == -1 && !found) return false;
+			if (page.next == -1 || found) break;
+			prev_pos = overwrite_pos;
+			prev_page = page;
+			overwrite_pos = page.next;
+			file.seekg(page.next, ios::beg);
+			file.read((char*) & page, sizeof(page));
+		}
+
+		//cout << "Sobreescribiendo pagina en : " << overwrite_pos << endl;
+		if (page.size == 0) {
+			//cout << "Se quedo vacio" << endl;
+			if (prev_page.next != -2) {
+				//cout << "Cambiando puntero de pagina anterior a " << page.next << endl;
+				prev_page.next = page.next;
+				page.next = ELIMINADO;
+				file.seekg(prev_pos, ios::beg);
+				file.write((char*) & prev_page, sizeof(prev_page));
+			} else {
+				//cout << "Pagina inicial" << endl;
+			}
+		}
+		file.seekg(overwrite_pos, ios::beg);
+		file.write((char*) & page, sizeof(page));
+		file.close();
+		// cout << "Se encontro " << key << endl;
+		return true;
+	}
+
+	void remove_from_page(RecordPage & page, int key, int pos) {
+		page.size--;
+		for (int i = pos; i < page.size; i++) {
+			page.r[i] = page.r[i+1];
+		}
+	}
+
 };
