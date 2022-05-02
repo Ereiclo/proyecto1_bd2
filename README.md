@@ -35,3 +35,31 @@ bool remove_record(int key); //como remover un registro con llave key, si no se 
 RecordE search(int key); //buscar un registro O(n)
 search_by_range(int begin,int end); //buscar un rango de registros O(n)
 ```
+
+## Parser 
+
+Las consultas que pueden leer actualmente nuestro programa son:  Select, Insert, Delete
+Para todas las consultas cada palabra clave debe estar separada por espacios, incluyendo espacio entre cuando se coloca coma o parentsis
+# Consulta select
+La consulta select debe tener el formato 'select * from archivo where key + condicion', la condicion puede ser '< , > o =' +  'dato'.
+En el caso de una consulta por rangos debera tener que agregarse 'and key + condicion'. 
+
+# Consulta delete
+La consulta delete debe tener el formato 'delete from archivo where key = dato '.  
+
+# Consulta insert 
+La consulta insert debe tener el formato 'insert into archivo ( key, survived , name , sex , age ) values ( dato_key , dato_survived , dato_name , dato_sex , dato_age )' 
+
+
+## Insercion de Data
+Para la insercion de datos dentro de nuestros arcivos se construyo y uso las funciones 'eh_insert()' y 'sf_insert()' para las estructuras correspondientes 'extendisble hash' y 'sequential file'
+
+# SF
+```cpp
+void sf_insert();
+```
+# EH
+```cpp
+void eh_insert();
+```
+
