@@ -4,30 +4,78 @@
 #include <fstream>
 #include <functional>
 #include <string>
-#define M 3
+#define M 10
 #define ELIMINADO -3
 
 using namespace std;
 
+void printcharE(char* s, int size) {
+    int i = 0;
+    string buffer;
+    while (s[i] != '\0') {
+        buffer += s[i++];
+    }
+    cout << buffer << " ";
+}
 
+struct RecordE {
+    int key;
+    bool survived;
+    char name[256];
+    char sex[10];
+    int age;
 
-struct RecordE{
-  int key;
-  int cantidad;
-  char anio[5] = "2022" ;
+    RecordE() {}
 
+    RecordE(int pid, bool s, char* n, char* se, int a) {
+        key = pid;
+        survived = s;
+        for (int i = 0; i < 256; i++) {
+            name[i] = n[i];
+        }
+        for (int i = 0; i < 10; i++) {
+            sex[i] = se[i];
+        }
+        age = a;
+    };
 
-  void show_data(){
-    cout<<key<<" ";
-    //cout<<cantidad<<" ";
-    //for(int i = 0; i < 4;++i)
-      //cout<<anio[i];
-    cout<<endl;
-  }
+    void show_data() {
+        cout << "ID: " << key << endl;
+        cout << "Nombre: ";
+        printcharE(name,256);
+        cout << endl;
+        cout << "Sexo: ";
+        printcharE(sex, 10);
+        cout << endl;
+        cout << "Edad: " << age << endl;
+        if (survived) cout << "Sobrevivio: true" << endl;
+        else cout << "Sobrevivio: false";
+    }
 
-
+    void show_meta() {
+        // cout << "Next freelist/deleted: " << next_freelist << endl;
+        // cout << "Is next in aux? " << next.aux << endl;
+        // cout << "Next pointer: " << next.next << endl;
+        // cout<<"----------------------"<<endl;
+        /* cout<<"key: "<<key<<endl; */
+        /* cout<<"cantidad: "<<cantidad<<endl; */
+        /* cout<<"anio: "<<anio<<endl; */
+        /* cout<<"----------------------"<<endl; */
+        show_data();
+    }
 };
 
+
+
+inline ostream & operator << (ostream & stream, RecordE  p){
+    //stream.write((char*) &p, (sizeof(p) + 1));
+    p.show_data();
+    return stream;
+}
+inline istream & operator >> (istream & stream, RecordE  p){
+    stream.read((char*) &p, sizeof(p));
+    return stream;
+}
 struct RecordPage{
   RecordE r[M];
   int size;
@@ -75,8 +123,9 @@ class ExtendibleHash {
     fstream file2;
     file2.open(_index,ios::in|ios::out|ios::binary);
 
-  
+    //cout<<file2.peek();
     if(file2.peek() != EOF){
+    //if(0){
 
       char buffer[256];
       char buffer2[9];
@@ -87,7 +136,7 @@ class ExtendibleHash {
         file2.getline(buffer,256,'|');
         string temp(buffer);
         file2.read((char*)&pag,sizeof(long));
-        cout<<"aaa: "<<" "<<temp << "->" << pag<<endl<<endl;
+        //cout<<"aaa: "<<" "<<temp << "->" << pag<<endl<<endl;
         file2.get();
         auto temp2 = root;
 
@@ -141,13 +190,14 @@ class ExtendibleHash {
   }
 
   ~ExtendibleHash(){
+
     map<string,long> ayuda;
     fstream index;
     index.open(_index,ios::out|ios::binary);
     inorder(root,ayuda,"");
-
+    //cout<<"debería estar bien: "<<endl;
     for(auto it = ayuda.begin();it!= ayuda.end();++it){
-      cout<<it->first<<" "<<it->second<<endl; 
+      //cout<<it->first<<" "<<it->second<<endl; 
       index.write((it->first).c_str(),(it->first).size());
       index.put('|');
       index.write((char*)& (it->second),sizeof(long));
@@ -155,6 +205,10 @@ class ExtendibleHash {
 
     }
     index.close();
+
+    
+
+       
   }
 
   void showAll(){
@@ -166,7 +220,10 @@ class ExtendibleHash {
       cout<<"Pagina en posicion: "<<file.tellg()<<endl;
       file.read((char*)&p, sizeof(RecordPage));
       p.show_data();
+
     }
+    file.close();
+
   }
 
   void insert(RecordE record){
@@ -184,45 +241,48 @@ class ExtendibleHash {
     file.read((char*) &p,sizeof(p));
 
     if(p.size < M){
- 
+      //cout << record.key << " va en pagina con pos: " << temp->page << endl;
       p.r[p.size++] = record;
       file.seekp(temp->page);
       file.write((char*)&p,sizeof(p));
       file.close();
-    
+      //cout<<"La siguiente pagina es: "<<p.next<<endl;
     } else {
       if (shift >= 0) {
-        long temp2 = temp->page;
-        long size2 = p.size;
-        file.seekp(0,ios::end);
-        temp->createChildren(temp2,file.tellp());
-        p.size = 0;
-        p.next = -1;
-        file.write((char*)&p,sizeof(p));
-        file.seekp(temp2);
-        file.write((char*)&p,sizeof(p));
-        file.close();
+	long temp2 = temp->page;
+	long size2 = p.size;
+	file.seekp(0,ios::end);
+	temp->createChildren(temp2,file.tellp());
+	p.size = 0;
+	p.next = -1;
+	file.write((char*)&p,sizeof(p));
+	file.seekp(temp2);
+	file.write((char*)&p,sizeof(p));
+	file.close();
 
-        insert(record);
+	insert(record);
 
-        for (int i = 0; i < size2; ++i){
-          insert(p.r[i]);
-        }
+	for (int i = 0; i < size2; ++i){
+	  insert(p.r[i]);
+	}
       } else {
-        RecordPage new_page;
-        file.seekp(0,ios::end);
-        new_page.r[0] = record;
-        new_page.size = 1;
-        new_page.next = file.tellp();
-        file.write((char*)&p,sizeof(p));
-        file.seekp(temp->page);
-        file.write((char*)&new_page,sizeof(new_page));
-        file.close();
+	RecordPage new_page;
+	file.seekp(0,ios::end);
+	new_page.r[0] = record;
+	new_page.size = 1;
+	new_page.next = file.tellp();
+	file.write((char*)&p,sizeof(p));
+	file.seekp(temp->page);
+	file.write((char*)&new_page,sizeof(new_page));
+	file.close();
+	//cout << record.key << " va en pagina con pos: " << temp->page << endl;
       }
-    }
-  }
 
-  bool remove(int key) {
+    }
+
+
+  }
+	bool remove(int key) {
 		cout << "Removing : " << key << endl;
 		int bucket = myHash(key) % (1 << global_depth);
     int shift = global_depth-1;
@@ -280,33 +340,69 @@ class ExtendibleHash {
 			page.r[i] = page.r[i+1];
 		}
 	}
-	bool existinrecord(RecordE record, int key){
+
+ bool existinrecord(RecordE record, int key){
 		if (record.key == key) return true;
 		return false;
 	}
-	Record search(int key){
+
+	RecordE search(int key){
 		int bucket = myHash(key) % (2 << (global_depth - 1));
 		int shift = global_depth-1;
 		auto temp = root;
 		while(temp->children != nullptr) temp = temp->children[(bucket >> shift--) & 1];
-		long temp_page = temp->page;
+		
 		fstream file;
-		RecordPage p;
+		
 		file.open(_file,ios::in|ios::out|ios::binary);
-		file.seekg(temp_page);
-		file.read((char*) &p,sizeof(p));
+
+    
+    long temp_page = temp->page;
 		while(true){
-			for(int i=0; i<M; i++){
-				if (existinrecord(p.r[i], key)) return p.r[i];
-			}
-			if (p.next != 0){
-				temp_page = p.next;
-				file.seekg(temp_page);
-				file.read((char*) &p,sizeof(p)); 
-			}
-			else break;
-		}
-		abort();
+      RecordPage p;  
+      file.seekg(temp_page);
+  		file.read((char*) &p,sizeof(p));
+      for(int i=0; i<p.size; i++){
+        if (existinrecord(p.r[i], key)) return p.r[i];
+      }
+      if (p.next != -1){
+        temp_page = p.next;
+      }
+      else break;
+    }
+		throw "No se encontro el registro";
 	}	
 
+  RecordE readRecord(int i)
+    {
+        ifstream inFile;
+        RecordE record;
+        inFile.open(_file, ios::binary);
+        inFile.seekg(i * sizeof(record), ios::beg);
+        inFile.read((char *) &record, sizeof(record));
+        inFile.close();
+        return record;
+    }
+
+    vector<RecordE> SearchByRange(int bkey, int ekey){
+      cout << "buscando entre " << bkey << " y " << ekey << endl;
+      vector<RecordE>r;
+      fstream file;
+      RecordPage p;
+      file.open(_file,ios::in|ios::out|ios::binary);
+
+      while(file.peek() != EOF){
+        file.read((char*)&p, sizeof(RecordPage));
+  
+        for(int i=0;p.next!=ELIMINADO & i<p.size;++i) {
+            if(p.r[i].key > bkey & p.r[i].key < ekey) {
+                r.push_back(p.r[i]);
+            }
+        }
+
+      }
+      file.close();
+
+      return r;
+    }
 };
