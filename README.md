@@ -63,6 +63,9 @@ void sf_insert();
 void eh_insert();
 ```
 
+# Inicializacion de Data
+Para poder inicilizar los archivos primero se deberan correr las funciones 'sf_insert()' y 'eh_insert()' por lo menos una vez para poder crear los archivos .dat
+
 ## Link de Replit
 Se trabajo tambien en un replit, donde puede probar nuestro codigo: 
 https://replit.com/join/sfzdtnwiaf-ereiclo
