@@ -6,7 +6,7 @@ Este es el repositorio del grupo 1 para el el proyecto 1 del curso Base de datos
 | Nombre   | Actividades | Nota |
 |-----|------------------|------------------|
 | Eric Bracamonte |    Remove sequential file, redo sequential file, insert extendible hash, guardar digital tree en memoria secundaria |            |
-| Paulo Cuaresma  |      Búsqueda en sequential file, búsqueda por rango en exntendible hash, sql parser con consola, edito el video    |           |
+| Paulo Cuaresma  |      Búsqueda en sequential file, búsqueda por rango en exntendible hash, sql parser con consola, edición del video    |           |
 | Francisco Magot |    Insert sequential file, redo sequential file, remove extendible hash, parsear data real|       |         | 
 | Edgar Chacon    |    Búsqueda en sequential file, búsqueda en sequential en exntendible hash, sql parser con consola    |       |
 
@@ -14,9 +14,9 @@ Este es el repositorio del grupo 1 para el el proyecto 1 del curso Base de datos
 
 ```cpp
 public:
-SequentialFile(string filename,long _k); //como crear el archivo 
-void insert(RecordS record); //como insertar registros O(n + k)
-bool remove_record(int key); //como remover un registro con llave key, si no se pudo se retorna false O(n + k)
+SequentialFile(string filename,long _k); //crear el archivo 
+void insert(RecordS record); //insertar registros O(n + k)
+bool remove_record(int key); //remover un registro con llave key, si no se pudo se retorna false O(n + k)
 Record search(int key); //buscar un registro O(log n + k)
 search_by_range(int begin,int end); //buscar un rango de registros O(n + k)
 
@@ -29,9 +29,9 @@ redo()//rehace el archivo O(n)
 
 ```cpp
 public:
-ExtendibleHash(string filename,string index,int global_depth); //como crear el archivo 
-void insert(RecordS record); //como insertar registros O(1)
-bool remove_record(int key); //como remover un registro con llave key, si no se pudo se retorna false O(k)
+ExtendibleHash(string filename,string index,int global_depth); //crear el archivo 
+void insert(RecordS record); //insertar registros O(1)
+bool remove_record(int key); //remover un registro con llave key, si no se pudo se retorna false O(k)
 RecordE search(int key); //buscar un registro O(n)
 search_by_range(int begin,int end); //buscar un rango de registros O(n)
 ```
@@ -39,9 +39,9 @@ search_by_range(int begin,int end); //buscar un rango de registros O(n)
 ## Parser 
 
 Las consultas que pueden leer actualmente nuestro programa son:  Select, Insert, Delete
-Para todas las consultas cada palabra clave debe estar separada por espacios, incluyendo espacio entre cuando se coloca coma o parentsis
+Para todas las consultas cada palabra clave debe estar separada por espacios, incluyendo espacio entre cuando se coloca coma o parentesis
 ### Consulta select
-La consulta select debe tener el formato 'select * from titanic where key + condicion', la condicion puede ser '< , > o =' +  'dato'.
+La consulta select debe tener el formato 'select * from titanic where key + condicion', la condición puede ser '< , > o =' +  'dato'.
 En el caso de una consulta por rangos debera tener que agregarse 'and key + condicion'. 
 
 ### Consulta delete
@@ -52,7 +52,7 @@ La consulta insert debe tener el siguiente formato: 'insert into archivo ( key ,
 NOTA: En caso de que el nombre tenga espacios (ejem: paulo cuaresma ) convenientemente requerimos que se ingrese de la siguiente manera : paulo_cuaresma.
 
 # Insercion de Data
-Para la insercion de datos dentro de nuestros archivos se construyo y uso las funciones 'eh_insert()' y 'sf_insert()' para las estructuras correspondientes 'extendisble hash' y 'sequential file'. La data que se inserta se encuentra en el archivo 'titanic_data.csv' y guarda la información acerca de los pasajeros que estuvieron a bordo del Titanic y además indica si sobrevivieron o no.
+Para la inserción de datos dentro de nuestros archivos se construyó y uso las funciones 'eh_insert()' y 'sf_insert()' para las estructuras correspondientes 'extendisble hash' y 'sequential file'. La data que se inserta se encuentra en el archivo 'titanic_data.csv' y guarda la información acerca de los pasajeros que estuvieron a bordo del Titanic y además indica si sobrevivieron o no.
 
 ### SF
 ```cpp
@@ -64,12 +64,16 @@ void eh_insert();
 ```
 
 # Inicializacion de Data:
-Para poder inicializar los archivos, primero en el int main() se deberán llamar a las funciones 'sf_insert()' y 'eh_insert()' una sola vez, las cuales a traves del dataset crearan los archivos .dat.
+Para poder inicializar los archivos, primero en el int main() se deberán llamar a las funciones 'sf_insert()' y 'eh_insert()' una sola vez, las cuales a través del dataset crearan los archivos .dat.
 Finalmente para realizar consultas segun los metodos implementados se debera llamar a la funcion 'interfaz()' donde elegiremos una opción y procederemos a ingresar nuestras consultas.
 
 ## Link de Replit:
-Se trabajo tambien en un replit, donde puede probar nuestro codigo: 
+NOTA: Al correr nuestro código logramos observar que algunas veces no funciona con windows ni con clion por lo que recomendamos usar en sistemas linux o mac o hasta en replit.
+Se trabajó también en un replit, donde puede probar nuestro código directamente sin tener que inicializar la data: 
 https://replit.com/join/sfzdtnwiaf-ereiclo
 
 ## Link del video:
 https://www.youtube.com/watch?v=OHvVuqc6sSE
+
+
+
