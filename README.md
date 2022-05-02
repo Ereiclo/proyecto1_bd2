@@ -45,14 +45,14 @@ La consulta select debe tener el formato 'select * from archivo where key + cond
 En el caso de una consulta por rangos debera tener que agregarse 'and key + condicion'. 
 
 ### Consulta delete
-La consulta delete debe tener el formato 'delete from archivo where key = dato '.  
+La consulta delete debe tener el siguiente formato: 'delete from archivo where key = dato '.  
 
 ### Consulta insert 
-La consulta insert debe tener el formato 'insert into archivo ( key, survived , name , sex , age ) values ( dato_key , dato_survived , dato_name , dato_sex , dato_age )' 
+La consulta insert debe tener el siguiente formato: 'insert into archivo ( key , survived , name , sex , age ) values ( dato_key , dato_survived , dato_name , dato_sex , dato_age )' 
 
 
 # Insercion de Data
-Para la insercion de datos dentro de nuestros archivos se construyo y uso las funciones 'eh_insert()' y 'sf_insert()' para las estructuras correspondientes 'extendisble hash' y 'sequential file'
+Para la insercion de datos dentro de nuestros archivos se construyo y uso las funciones 'eh_insert()' y 'sf_insert()' para las estructuras correspondientes 'extendisble hash' y 'sequential file'. La data que se inserta se encuentra en el archivo 'titanic_data.csv' y guarda la información acerca de los pasajeros que estuvieron a bordo del Titanic y además indica si sobrevivieron o no.
 
 ### SF
 ```cpp
@@ -64,7 +64,7 @@ void eh_insert();
 ```
 
 # Inicializacion de Data
-Para poder inicilizar los archivos primero se deberan correr las funciones 'sf_insert()' y 'eh_insert()' por lo menos una vez para poder crear los archivos .dat
+Para poder inicializar los archivos primero se deberán correr las funciones 'sf_insert()' y 'eh_insert()' una sola vez para poder crear los archivos .dat a partir del dataset conseguido.
 
 ## Link de Replit
 Se trabajo tambien en un replit, donde puede probar nuestro codigo: 
