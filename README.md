@@ -6,7 +6,7 @@ Este es el repositorio del grupo 1 para el el proyecto 1 del curso Base de datos
 | Nombre   | Actividades | Nota |
 |-----|------------------|------------------|
 | Eric Bracamonte |    Remove sequential file, redo sequential file, insert extendible hash, guardar digital tree en memoria secundaria |            |
-| Paulo Cuaresma  |      Búsqueda en sequential file, búsqueda por rango en exntendible hash, sql parser con consola, edito el video    |           |
+| Paulo Cuaresma  |      Búsqueda en sequential file, búsqueda por rango en exntendible hash, sql parser con consola, edición del video    |           |
 | Francisco Magot |    Insert sequential file, redo sequential file, remove extendible hash, parsear data real|       |         | 
 | Edgar Chacon    |    Búsqueda en sequential file, búsqueda en sequential en exntendible hash, sql parser con consola    |       |
 
