@@ -68,8 +68,12 @@ Para poder inicializar los archivos, primero en el int main() se deberán llamar
 Finalmente para realizar consultas segun los metodos implementados se debera llamar a la funcion 'interfaz()' donde elegiremos una opción y procederemos a ingresar nuestras consultas.
 
 ## Link de Replit:
-Se trabajó también en un replit, donde puede probar nuestro código: 
+NOTA: Al correr nuestro código logramos observar que algunas veces no funciona con windows ni con clion por lo que recomendamos usar en sistemas linux o mac o hasta en replit.
+Se trabajó también en un replit, donde puede probar nuestro código directamente sin tener que inicializar la data: 
 https://replit.com/join/sfzdtnwiaf-ereiclo
 
 ## Link del video:
 https://www.youtube.com/watch?v=OHvVuqc6sSE
+
+
+
