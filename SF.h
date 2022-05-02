@@ -7,6 +7,15 @@
 
 using namespace std;
 
+void printcharS(char* s, int size) {
+    int i = 0;
+    string buffer;
+    while (s[i] != '\0') {
+        buffer += s[i++];
+    }
+    cout << buffer << " ";
+}
+
 struct pointer {
     bool aux;
     long next;
@@ -37,8 +46,10 @@ void createMetadata(string filename) {
 
 struct Record {
     int key;
-    int cantidad;
-    char anio[5];
+    bool survived;
+    char name[256];
+    char sex[10];
+    int age;
     pointer next;
     long next_freelist;
 
@@ -47,24 +58,46 @@ struct Record {
         next_freelist = -2;
     }
 
-    Record(int k, int c, string a) {
-        key = k;
-        cantidad = c;
-        for(int i = 0; i < a.size()+1;++i)
-            anio[i] = a[i];
+    Record(int pid, bool s, char* n, char* se, int a) {
+        key = pid;
+	survived = s;
+        for (int i = 0; i < 256; i++) {
+            name[i] = n[i];
+        }
+        for (int i = 0; i < 10; i++) {
+            sex[i] = se[i];
+        }
+        age = a;
         next = pointer();
         next_freelist = -2;
     }
-    void show_meta() {
-        /* cout << "Next freelist/deleted: " << next_freelist << endl; */
-        //cout << "Is next in aux? " << next.aux << endl;
-        //cout << "Next pointer: " << next.next << endl;
 
-        cout<<"key: "<<key<<endl;
-        cout<<"cantidad: "<<cantidad<<endl;
-        cout<<"anio: "<<anio<<endl;
+    void showdata() {
+        cout << "ID: " << key << endl;
+        cout << "Nombre: ";
+        printcharS(name,256);
+        cout << endl;
+        cout << "Sexo: ";
+        printcharS(sex, 10);
+        cout << endl;
+        cout << "Edad: " << age << endl;
+        if (survived) cout << "Sobrevivio: true" << endl;
+        else cout << "Sobrevivio: false";
+    }
+
+    void show_meta() {
+        // cout << "Next freelist/deleted: " << next_freelist << endl;
+        // cout << "Is next in aux? " << next.aux << endl;
+        // cout << "Next pointer: " << next.next << endl;
+        // cout<<"----------------------"<<endl;
+        /* cout<<"key: "<<key<<endl; */
+        /* cout<<"cantidad: "<<cantidad<<endl; */
+        /* cout<<"anio: "<<anio<<endl; */
+        /* cout<<"----------------------"<<endl; */
+        showdata();
     }
 };
+
 inline ostream & operator << (ostream & stream, Record  p){
     //stream.write((char*) &p, (sizeof(p) + 1));
     p.show_meta();
@@ -79,10 +112,12 @@ class SequentialFile {
     string _file;
     string _aux_file;
     string _metadata;
+    long aux_n = 0;
+    long k;
 
 public:
     SequentialFile(){};
-    SequentialFile(string filename): _file(filename + ".dat"), _aux_file(filename + "_aux.dat"), _metadata(filename + "_meta.dat") {
+    SequentialFile(string filename,long _k): _file(filename + ".dat"), _aux_file(filename + "_aux.dat"), _metadata(filename + "_meta.dat"),k{_k} {
         ofstream meta(_metadata, ios::binary | ios::app);
         fstream main(_file,ios::binary|ios::app|ios::out);
         fstream aux(_aux_file,ios::binary|ios::app|ios::out);
@@ -94,8 +129,20 @@ public:
         main.close();
     }
 
+ /*SequentialFile(string filename,long _k): _file(filename + ".dat"), _aux_file(filename + "_aux.dat"), _metadata(filename + "_meta.dat"),k{_k} {
+        ofstream metad(_metadata, ios::binary | ios::app);
+        fstream main(_file,ios::binary|ios::app|ios::out);
+        fstream auxx(_aux_file,ios::binary|ios::app|ios::out);
+        if (metad.tellp() == metad.eof()) {
+            createMetadata(_metadata);
+        }
+        metad.close();
+        auxx.close();
+        main.close();
+    }*/
+
     ~SequentialFile(){
-        //redo();
+        redo();
     }
 
     void insert(Record record) {
@@ -103,6 +150,8 @@ public:
         fstream file(_file, ios::in | ios::out | ios::binary);
         fstream aux(_aux_file, ios::in | ios::out | ios::binary);
         fstream meta(_metadata, ios::in | ios::out | ios::binary);
+
+
 
         Metadata metadata;
         Record current, prev, overwrite,top;
@@ -221,31 +270,79 @@ public:
                 aux.write((char*) & record, sizeof(record));
             }
         }
+
+
+        if(aux.is_open())
+            aux.close();
+        if(meta.is_open())
+            meta.close();
+        if(file.is_open())
+            file.close();
+
+        ++aux_n;
+        if(aux_n == k){
+            redo();
+            //showall();
+            aux_n = 0;
+        }
     }
 
     bool remove_record(int key){
-            fstream main;
-            fstream aux;
-            Metadata metadata;
-            pointer it;
-            main.open(_metadata,ios::in|ios::out|ios::binary);
-            main.read((char*)&metadata,sizeof(Metadata));
-            it.next = metadata.head_data.next;
-            it.aux = metadata.head_data.aux;
+        fstream main;
+        fstream aux;
+        Metadata metadata;
+        pointer it;
+        main.open(_metadata,ios::in|ios::out|ios::binary);
+        main.read((char*)&metadata,sizeof(Metadata));
+        it.next = metadata.head_data.next;
+        it.aux = metadata.head_data.aux;
+        main.close();
+        main.open(_file,ios::in|ios::out|ios::binary);
+        aux.open(_aux_file,ios::in|ios::out|ios::binary);
+
+        Record del;
+        Record temp;
+
+        if(it.next == -1){
             main.close();
-            main.open(_file,ios::in|ios::out|ios::binary);
-            aux.open(_aux_file,ios::in|ios::out|ios::binary);
+            aux.close();
+            return false;
 
-            Record del;
-            Record temp;
+        }
 
-            if(it.next == -1){
-                main.close();
-                aux.close();
-                return false;
+        if(it.aux){
+            aux.seekg(it.next);
+            aux.read((char*)&temp,sizeof(Record));
+        }else{
+            main.seekg(it.next);
+            main.read((char*)&temp,sizeof(Record));
+        }
+
+        if(temp.key == key){
+            if(it.aux){
+                temp.next_freelist = metadata.head_free_list;
+                aux.seekp(it.next);
+                aux.write((char*)&temp,sizeof(Record));
+                metadata.head_free_list = it.next;
+                /* cout<<"siguiente a eliminar: "<<temp.next_freelist<<endl; */
+
+            }else{
+                temp.next_freelist = -1;
+                main.seekp(it.next);
+                main.write((char*)&temp,sizeof(Record));
 
             }
+            fstream md;
+            md.open(_metadata,ios::out|ios::binary);
+            metadata.head_data.next = temp.next.next;
+            metadata.head_data.aux = temp.next.aux;
+            md.write((char*)&metadata,sizeof(Metadata));
+            md.close();
+            return true;
 
+        }
+
+        while(true){
             if(it.aux){
                 aux.seekg(it.next);
                 aux.read((char*)&temp,sizeof(Record));
@@ -254,98 +351,66 @@ public:
                 main.read((char*)&temp,sizeof(Record));
             }
 
-            if(temp.key == key){
-                if(it.aux){
-                    temp.next_freelist = metadata.head_free_list;
-                    aux.seekp(it.next);
-                    aux.write((char*)&temp,sizeof(Record));
-                    metadata.head_free_list = it.next;
-                    /* cout<<"siguiente a eliminar: "<<temp.next_freelist<<endl; */
-
-                }else{
-                    temp.next_freelist = -1;
-                    main.seekp(it.next);
-                    main.write((char*)&temp,sizeof(Record));
-
-                }
-                fstream md;
-                md.open(_metadata,ios::out|ios::binary);
-                metadata.head_data.next = temp.next.next;
-                metadata.head_data.aux = temp.next.aux;
-                md.write((char*)&metadata,sizeof(Metadata));
-                md.close();
-                return true;
-
+            if(temp.next.next == -1){
+                main.close();
+                aux.close();
+                return false;
             }
 
-            while(true){
+            if(temp.next.aux){
+                aux.seekg(temp.next.next);
+                aux.read((char*)&del,sizeof(Record));
+            }else{
+                main.seekg(temp.next.next);
+                main.read((char*)&del,sizeof(Record));
+            }
+
+            if(del.key == key){
+                /* cout<<del.key<<endl<<endl<<endl; */
+                if(temp.next.aux){
+                    del.next_freelist = metadata.head_free_list;
+                    aux.seekp(temp.next.next);
+                    aux.write((char*)&del,sizeof(Record));
+                    metadata.head_free_list = temp.next.next;
+                    /* cout<<"siguiente a eliminar: "<<del.next_freelist<<endl; */
+
+                    fstream md;
+                    md.open(_metadata,ios::out|ios::binary);
+                    md.write((char*)&metadata,sizeof(Metadata));
+                    md.close();
+
+                }else{
+                    del.next_freelist = -1;
+                    main.seekp(temp.next.next);
+                    main.write((char*)&del,sizeof(Record));
+
+                }
+
+                temp.next.next = del.next.next;
+                temp.next.aux = del.next.aux;
+
+
+
                 if(it.aux){
                     aux.seekg(it.next);
-                    aux.read((char*)&temp,sizeof(Record));
+                    aux.write((char*)&temp,sizeof(Record));
                 }else{
                     main.seekg(it.next);
-                    main.read((char*)&temp,sizeof(Record));
+                    main.write((char*)&temp,sizeof(Record));
                 }
 
-                if(temp.next.next == -1){
-                    main.close();
-                    aux.close();
-                    return false;
-                }
-
-                if(temp.next.aux){
-                    aux.seekg(temp.next.next);
-                    aux.read((char*)&del,sizeof(Record));
-                }else{
-                    main.seekg(temp.next.next);
-                    main.read((char*)&del,sizeof(Record));
-                }
-
-                if(del.key == key){
-                    /* cout<<del.key<<endl<<endl<<endl; */
-                    if(temp.next.aux){
-                        del.next_freelist = metadata.head_free_list;
-                        aux.seekp(temp.next.next);
-                        aux.write((char*)&del,sizeof(Record));
-                        metadata.head_free_list = temp.next.next;
-                        /* cout<<"siguiente a eliminar: "<<del.next_freelist<<endl; */
-
-                        fstream md;
-                        md.open(_metadata,ios::out|ios::binary);
-                        md.write((char*)&metadata,sizeof(Metadata));
-                        md.close();
-
-                    }else{
-                        del.next_freelist = -1;
-                        main.seekp(temp.next.next);
-                        main.write((char*)&del,sizeof(Record));
-
-                    }
-
-                    temp.next.next = del.next.next;
-                    temp.next.aux = del.next.aux;
-
-
-
-                    if(it.aux){
-                        aux.seekg(it.next);
-                        aux.write((char*)&temp,sizeof(Record));
-                    }else{
-                        main.seekg(it.next);
-                        main.write((char*)&temp,sizeof(Record));
-                    }
-
-                    return true;
-                }
-
-                it.next = temp.next.next;
-                it.aux = temp.next.aux;
-
+                return true;
             }
 
-
+            it.next = temp.next.next;
+            it.aux = temp.next.aux;
 
         }
+
+
+
+    }
+
 
     void redo() {
         fstream main;
@@ -384,6 +449,7 @@ public:
             }
             temp_next = temp.next;
             temp.next.aux = 0;
+            temp.next_freelist = 0;
             if (temp.next.next != -1) temp.next.next = new_pos;
             else temp.next.next = -1;
             new_file.write((char*)&temp,sizeof(Record));
@@ -441,8 +507,12 @@ public:
 
     void eliminar_archivos(){
         int status = remove(_file.c_str());
+        //int status = remove("test.dat");
+        cout<<status;
         int status2 = remove(_aux_file.c_str());
+        cout<<status2;
         int status3 = remove(_metadata.c_str());
+        cout<<status3;
     }
     Record readRecordM(long i)
     {
@@ -487,7 +557,7 @@ public:
         file.open(file_,ios::app);
         file.seekg(0,ios::end);
         int nregistros = file.tellp()/sizeof(Record);
-        cout<<"r2:"<<nregistros<<endl;
+        //cout<<"r2:"<<nregistros<<endl;
         vector<int> Pos;
         if(!file.is_open()){
             cout << "No se pudo abrir el archivo.\n";
@@ -509,7 +579,7 @@ public:
 
     vector<Record> SearchByRange(int begin, int end){
         vector<Record> alumnos;
-        vector<int> k = SearchPos(begin ,end,  _file);
+        vector<int> k = SearchPos(begin ,end, _file);
         vector<int> a = SearchPos(begin ,end, _aux_file);
         if(!k.empty() || !a.empty()){
             for(int i=0; i<k.size(); i++){
@@ -521,9 +591,10 @@ public:
             return alumnos;
         }
         else{
-            abort();
+            throw "No se encontraron los registros";
         }
     }
+    
     long SearchPos(int key){
 
 
@@ -617,86 +688,5 @@ public:
 
 
     }
-
+    
 };
-
-void insertar_tests(SequentialFile&seq){
-    Record rec1(10, 10, "2022");
-    Record rec2(15, 10, "2022");
-    Record rec3(5, 10, "2022");
-    Record rec4(22, 10, "2022");
-    Record rec5(69, 10, "2022");
-    Record rec6(30, 10, "2022");
-    Record rec7(20,10,"2022");
-
-    seq.insert(rec1);
-    seq.insert(rec2);
-    seq.insert(rec3);
-    seq.insert(rec4);
-    seq.insert(rec5);
-    seq.insert(rec6);
-    seq.insert(rec7);
-
-
-}
-
-void insertar_tests2(SequentialFile&seq){
-    Record rec1(37, 10, "2022");
-    Record rec2(51, 10, "2022");
-    Record rec3(73, 10, "2022");
-    Record rec4(13, 10, "2022");
-    Record rec5(8, 10, "2022");
-    Record rec6(2, 10, "2022");
-    Record rec7(90,10,"2022");
-
-    seq.insert(rec1);
-    seq.insert(rec2);
-    seq.insert(rec3);
-    seq.insert(rec4);
-    seq.insert(rec5);
-    seq.insert(rec6);
-    seq.insert(rec7);
-
-
-}
-
-/*int main() {*/
-    /*SequentialFile seq("test");*/
-    //seq.eliminar_archivos();
-    //insertar_tests2(seq);
-
-    //seq.remove_record(90);
-    //vector<Record> recs = seq.SearchByRange(1, 9);
-    //for (int i=0; i<recs.size(); i++){cout << recs[i].key << " " << recs[i].anio << " " <<recs[i].cantidad << endl;}
-
-    /*seq.showall();*/
-    //cout<<seq.Search(90);
-    //cout<<"---"<<endl;
-    //seq.remove_record(90);
-    //cout<<"---"<<endl;
-    /*try{
-        cout<<seq.Search(90);
-    }catch(char const * x){
-        cout<<x;
-    }*/
-
-    // cout<<endl; 
-    //seq.showall();
-
-
-    /* seq.showall(); */
-    /* Record rec6(13, 10, "2022"); */
-    /* seq.insert(rec6); */
-    //seq.showall();
-
-/*} */
-/* Metadata md; */
-/* fstream ayuda; */
-/* ayuda.open("test_meta.dat",ios::in|ios::binary); */
-/* ayuda.read((char*)&md,sizeof(Metadata)); */
-/* ayuda.close(); */
-
-/* cout<<sizeof(Record)<<endl; */
-/* cout<<md.head_data.next<<endl; */
-/* cout<<md.head_data.aux<<endl; */
-/* cout<<md.head_free_list<<endl; */
