@@ -44,14 +44,14 @@ Para todas las consultas cada palabra clave debe estar separada por espacios, in
 La consulta select debe tener el formato 'select * from archivo where key + condicion', la condicion puede ser '< , > o =' +  'dato'.
 En el caso de una consulta por rangos debera tener que agregarse 'and key + condicion'. 
 
-# Consulta delete
+### Consulta delete
 La consulta delete debe tener el formato 'delete from archivo where key = dato '.  
 
-# Consulta insert 
+### Consulta insert 
 La consulta insert debe tener el formato 'insert into archivo ( key, survived , name , sex , age ) values ( dato_key , dato_survived , dato_name , dato_sex , dato_age )' 
 
 
-## Insercion de Data
+### Insercion de Data
 Para la insercion de datos dentro de nuestros arcivos se construyo y uso las funciones 'eh_insert()' y 'sf_insert()' para las estructuras correspondientes 'extendisble hash' y 'sequential file'
 
 # SF
