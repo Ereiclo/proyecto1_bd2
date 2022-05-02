@@ -52,7 +52,7 @@ La consulta insert debe tener el formato 'insert into archivo ( key, survived , 
 
 
 # Insercion de Data
-Para la insercion de datos dentro de nuestros arcivos se construyo y uso las funciones 'eh_insert()' y 'sf_insert()' para las estructuras correspondientes 'extendisble hash' y 'sequential file'
+Para la insercion de datos dentro de nuestros archivos se construyo y uso las funciones 'eh_insert()' y 'sf_insert()' para las estructuras correspondientes 'extendisble hash' y 'sequential file'
 
 ### SF
 ```cpp
