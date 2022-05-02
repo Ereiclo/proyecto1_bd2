@@ -139,7 +139,7 @@ void Function(int data_type){
                             cout <<"survived: true"<<endl;
                         }
                         else cout <<"survived: false"<<endl;
-                        cout <<"cantidad: " <<recs[i].name << endl;
+                        cout <<"nombre: " <<recs[i].name << endl;
                         cout <<"sex: " <<recs[i].sex << endl;
                         cout <<"age: " <<recs[i].age << endl;
 
@@ -451,8 +451,8 @@ void sf_insert                                   () {
 }
 int main(){
     interfaz();
-  cout<<"Hasta pronto!"<<endl;
-      return 0;
+    cout<<"Hasta pronto!"<<endl;
+    return 0;
 }
 
 
